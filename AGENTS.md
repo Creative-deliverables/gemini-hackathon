@@ -9,8 +9,9 @@
 ```
 프로젝트명: 원고 → 상세페이지 생성기
 목적: 작가가 원고(PDF)를 업로드하면 Gemini API가 분석하여 온라인 판매 플랫폼용 상세페이지를 자동 생성
-스택: Next.js 14 (App Router) + TypeScript + Tailwind CSS + Google Gemini API
-배포: Vercel
+스택: Flutter 3.41.2 + Dart 3.11.0 + Firebase AI Logic (firebase_ai) + Gemini API
+배포: Firebase Hosting (flutter build web)
+특이사항: PDF를 별도 파싱 없이 Gemini에 bytes로 직접 전송 (InlineDataPart)
 ```
 
 ---
@@ -18,12 +19,15 @@
 ## 🏗 아키텍처 개요
 
 ```
-[사용자] → [파일 업로드 UI] → [Next.js API Route]
+[사용자] → [파일 업로드 UI] → [file_picker]
                                       ↓
-                              [PDF 파싱 (pdf-parse)]
+                              [PDF → Uint8List (bytes)]
                                       ↓
-                              [Gemini API 호출]
-                              (gemini-2.0-flash)
+                              [Firebase AI Logic 호출]
+                              InlineDataPart('application/pdf', bytes)
+                                      ↓
+                              [Gemini API 직접 분석]
+                              (gemini-2.5-flash-lite)
                                       ↓
                               [상세페이지 텍스트 생성]
                                       ↓
@@ -36,13 +40,13 @@
 
 | 파일 | 역할 | 수정 시 주의사항 |
 |------|------|-----------------|
-| `app/api/analyze/route.ts` | Gemini API 호출 메인 엔드포인트 | 프롬프트 변경 시 `lib/prompts.ts`와 함께 수정 |
-| `lib/gemini.ts` | Gemini 클라이언트 초기화 및 래퍼 | API 키는 반드시 환경 변수에서 읽기 |
-| `lib/prompts.ts` | AI 프롬프트 템플릿 모음 | 플랫폼별 프롬프트 분리 유지 |
-| `lib/pdf-parser.ts` | PDF → 텍스트 변환 | 대용량 파일(10MB+) 처리 고려 |
-| `components/FileUpload.tsx` | 드래그 앤 드롭 업로드 UI | 파일 크기/형식 검증 포함 |
-| `components/DetailPagePreview.tsx` | 생성 결과 미리보기 | 플랫폼별 렌더링 분기 처리 |
-| `types/index.ts` | 전역 TypeScript 타입 | 새 타입 추가 시 여기에 정의 |
+| `lib/services/gemini_service.dart` | Firebase AI Logic 호출 & 프롬프트 | 프롬프트 변경 시 플랫폼별 분기 유지 |
+| `lib/main.dart` | 앱 진입점, Firebase 초기화 | `firebase_options.dart` 없으면 실행 불가 |
+| `lib/screens/home_screen.dart` | 메인 화면 (업로드 + 결과) | 상태 관리 로직 포함 |
+| `lib/widgets/file_upload_widget.dart` | PDF 업로드 UI | 파일 크기(20MB) 검증 포함 |
+| `lib/widgets/platform_selector.dart` | 플랫폼 선택 UI | 플랫폼 추가 시 프롬프트도 함께 수정 |
+| `lib/models/detail_page_model.dart` | 상세페이지 데이터 모델 | 새 필드 추가 시 여기에 정의 |
+| `firebase_options.dart` | Firebase 프로젝트 설정 | `flutterfire configure`로 자동 생성, 수동 수정 금지 |
 
 ---
 
@@ -52,21 +56,21 @@
 
 **구체적인 파일과 함께 요청:**
 ```
-"app/api/analyze/route.ts 파일에서 Gemini API를 호출하는 부분을 수정해줘.
+"lib/services/gemini_service.dart 파일에서 Gemini API를 호출하는 부분을 수정해줘.
 현재는 단순 텍스트만 반환하는데, JSON 형식으로 { title, description, targetAudience, benefits } 를 반환하도록 변경해줘."
 ```
 
 **컨텍스트를 포함한 요청:**
 ```
-"lib/prompts.ts의 generateDetailPagePrompt 함수를 수정해줘.
+"lib/services/gemini_service.dart의 generateDetailPage 메서드를 수정해줘.
 현재 크몽 플랫폼용 프롬프트인데, 클래스101 플랫폼에 맞게 커리큘럼 구조를 강조하는 버전도 추가해줘."
 ```
 
 **에러 메시지와 함께 요청:**
 ```
-"PDF 파싱 시 다음 에러가 발생해:
-Error: ENOENT: no such file or directory
-lib/pdf-parser.ts 파일을 확인하고 수정해줘."
+"PDF 전송 시 다음 에러가 발생해:
+FirebaseException: [firebase_ai] INVALID_ARGUMENT
+lib/services/gemini_service.dart 파일을 확인하고 수정해줘."
 ```
 
 ### ❌ DON'T — 이런 요청은 피하세요
@@ -90,20 +94,20 @@ lib/pdf-parser.ts 파일을 확인하고 수정해줘."
 
 | 모델 | 용도 | 비고 |
 |------|------|------|
-| `gemini-2.0-flash` | **기본 사용** — 빠른 응답, 비용 효율 | 대부분의 경우 이 모델 사용 |
-| `gemini-1.5-pro` | 대용량 문서 분석 (100만 토큰) | 필요 시에만 사용 |
+| `gemini-2.5-flash-lite` | **기본 사용** — 빠른 응답, 비용 효율 | 대부분의 경우 이 모델 사용 |
+| `gemini-2.5-flash` | 복잡한 문서 분석, 높은 정확도 필요 시 | 필요 시에만 사용 |
 
 ### 프롬프트 작성 원칙
 
-```typescript
-// lib/prompts.ts 작성 시 따를 원칙
+```dart
+// lib/services/gemini_service.dart 작성 시 따를 원칙
 
 // 1. 역할 부여 (Role)
-const systemPrompt = `당신은 전문 마케팅 카피라이터입니다.
-작가의 원고를 분석하여 온라인 판매 플랫폼에 최적화된 상세페이지를 작성합니다.`;
+const systemPrompt = '당신은 전문 마케팅 카피라이터입니다. '
+    '작가의 원고를 분석하여 온라인 판매 플랫폼에 최적화된 상세페이지를 작성합니다.';
 
 // 2. 출력 형식 명시 (Format)
-const formatInstruction = `반드시 다음 JSON 형식으로 응답하세요:
+const formatInstruction = '''반드시 다음 JSON 형식으로 응답하세요:
 {
   "title": "상품명 (50자 이내)",
   "subtitle": "부제목 (100자 이내)",
@@ -111,31 +115,30 @@ const formatInstruction = `반드시 다음 JSON 형식으로 응답하세요:
   "targetAudience": ["타겟 독자 1", "타겟 독자 2"],
   "benefits": ["기대 효과 1", "기대 효과 2"],
   "tableOfContents": ["목차 1", "목차 2"]
-}`;
-
-// 3. 원고 내용 삽입
-const userPrompt = `다음 원고를 분석해주세요:\n\n${manuscriptText}`;
+}''';
 ```
 
 ### API 호출 패턴
 
-```typescript
-// app/api/analyze/route.ts 기본 패턴
-import { GoogleGenerativeAI } from "@google/generative-ai";
+```dart
+// lib/services/gemini_service.dart 기본 패턴
+import 'package:firebase_ai/firebase_ai.dart';
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+class GeminiService {
+  final _model = FirebaseAI.googleAI().generativeModel(
+    model: 'gemini-2.5-flash-lite',
+  );
 
-export async function POST(request: Request) {
-  const { manuscriptText, platform } = await request.json();
-  
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-  
-  const prompt = generateDetailPagePrompt(manuscriptText, platform);
-  const result = await model.generateContent(prompt);
-  const response = result.response.text();
-  
-  // JSON 파싱 및 반환
-  return Response.json(JSON.parse(response));
+  Future<String> generateDetailPage(Uint8List pdfBytes, String platform) async {
+    final prompt = TextPart(_buildPrompt(platform));
+    final pdfPart = InlineDataPart('application/pdf', pdfBytes);
+
+    final response = await _model.generateContent([
+      Content.multi([prompt, pdfPart])
+    ]);
+
+    return response.text ?? '';
+  }
 }
 ```
 
@@ -143,34 +146,52 @@ export async function POST(request: Request) {
 
 ## 🎨 UI/UX 컨벤션
 
-### Tailwind CSS 클래스 패턴
+### Flutter 위젯 패턴
 
-```tsx
+```dart
 // 카드 컴포넌트 기본 스타일
-<div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+Card(
+  elevation: 2,
+  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+  child: Padding(padding: EdgeInsets.all(24), child: ...),
+)
 
 // 주요 버튼
-<button className="rounded-lg bg-blue-600 px-6 py-3 text-white font-semibold hover:bg-blue-700 transition-colors">
+ElevatedButton(
+  style: ElevatedButton.styleFrom(
+    backgroundColor: Colors.blue[600],
+    padding: EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+  ),
+  onPressed: () {},
+  child: Text('상세페이지 생성', style: TextStyle(fontWeight: FontWeight.bold)),
+)
 
 // 섹션 제목
-<h2 className="text-2xl font-bold text-gray-900 mb-4">
+Text('결과', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold))
 
 // 보조 텍스트
-<p className="text-sm text-gray-500">
+Text('파일을 선택해주세요', style: TextStyle(fontSize: 12, color: Colors.grey[500]))
 ```
 
-### 컴포넌트 작성 규칙
+### 위젯 작성 규칙
 
-```tsx
-// 모든 컴포넌트는 TypeScript + 명시적 Props 타입 사용
-interface FileUploadProps {
-  onFileSelect: (file: File) => void;
-  accept?: string;
-  maxSizeMB?: number;
-}
+```dart
+// 모든 위젯은 명시적 파라미터 타입 사용
+class FileUploadWidget extends StatelessWidget {
+  const FileUploadWidget({
+    super.key,
+    required this.onFileSelected,
+    this.maxSizeMB = 20,
+  });
 
-export function FileUpload({ onFileSelect, accept = ".pdf", maxSizeMB = 20 }: FileUploadProps) {
-  // ...
+  final void Function(Uint8List bytes, String fileName) onFileSelected;
+  final int maxSizeMB;
+
+  @override
+  Widget build(BuildContext context) {
+    // ...
+  }
 }
 ```
 
@@ -182,7 +203,7 @@ export function FileUpload({ onFileSelect, accept = ".pdf", maxSizeMB = 20 }: Fi
 
 ```
 □ PDF 업로드 → 파싱 성공 확인
-□ Gemini API 응답 → JSON 파싱 성공 확인
+□ Gemini API 응답 → 텍스트 수신 성공 확인
 □ 상세페이지 미리보기 렌더링 확인
 □ 복사 기능 동작 확인
 □ 대용량 파일 (10MB+) 처리 확인
@@ -202,10 +223,10 @@ export function FileUpload({ onFileSelect, accept = ".pdf", maxSizeMB = 20 }: Fi
 시간이 제한되어 있습니다. 다음 순서로 개발하세요:
 
 ### Phase 1 — 핵심 기능 (Must Have) `~3시간`
-- [ ] Next.js 프로젝트 초기 세팅
-- [ ] PDF 업로드 UI 구현
-- [ ] PDF → 텍스트 파싱
-- [ ] Gemini API 연동 및 상세페이지 생성
+- [ ] Flutter 프로젝트 초기 세팅 + Firebase 연동
+- [ ] PDF 업로드 UI 구현 (file_picker)
+- [ ] PDF bytes → Gemini 직접 전송
+- [ ] Firebase AI Logic 연동 및 상세페이지 생성
 - [ ] 결과 텍스트 표시 및 복사 기능
 
 ### Phase 2 — 완성도 향상 (Should Have) `~2시간`
@@ -214,18 +235,19 @@ export function FileUpload({ onFileSelect, accept = ".pdf", maxSizeMB = 20 }: Fi
 - [ ] 상세페이지 미리보기 레이아웃
 
 ### Phase 3 — 데모 준비 (Nice to Have) `~1시간`
-- [ ] Vercel 배포
+- [ ] Firebase Hosting 배포 (`flutter build web && firebase deploy`)
 - [ ] 랜딩 페이지 / 소개 섹션
 - [ ] 데모 시연 준비
+
 
 ---
 
 ## 🚨 주의사항
 
-1. **API 키 보안** — `GEMINI_API_KEY`는 절대 코드에 하드코딩 금지. 반드시 `.env.local` 사용
-2. **파일 크기 제한** — Gemini API의 토큰 한도 고려. 대용량 PDF는 청크 분할 처리
+1. **API 키 보안** — `firebase_options.dart`의 API 키는 절대 코드에 하드코딩 금지. `flutterfire configure` 사용
+2. **파일 크기 제한** — Gemini API 요청 한도 20MB. 대용량 PDF는 Cloud Storage 경유 처리
 3. **에러 핸들링** — API 호출 실패 시 사용자에게 명확한 에러 메시지 표시
-4. **타입 안전성** — `any` 타입 사용 금지. 모든 API 응답에 타입 정의 필수
+4. **타입 안전성** — `dynamic` 타입 사용 금지. 모든 API 응답에 모델 클래스 정의 필수
 5. **한국어 처리** — 프롬프트와 응답 모두 한국어로 처리. 인코딩 이슈 주의
 
 ---
@@ -233,10 +255,11 @@ export function FileUpload({ onFileSelect, accept = ".pdf", maxSizeMB = 20 }: Fi
 ## 📞 빠른 참고 링크
 
 - [Gemini API 문서](https://ai.google.dev/gemini-api/docs)
-- [Gemini API Node.js SDK](https://www.npmjs.com/package/@google/generative-ai)
-- [Next.js App Router 문서](https://nextjs.org/docs/app)
-- [shadcn/ui 컴포넌트](https://ui.shadcn.com/)
-- [pdf-parse npm](https://www.npmjs.com/package/pdf-parse)
+- [Firebase AI Logic (Dart) 문서](https://firebase.google.com/docs/ai-logic/get-started?platform=flutter)
+- [Firebase AI Logic — PDF 분석 가이드](https://firebase.google.com/docs/ai-logic/analyze-documents)
+- [file_picker 패키지](https://pub.dev/packages/file_picker)
+- [Firebase Hosting 배포 가이드](https://firebase.google.com/docs/hosting)
+
 
 ---
 
