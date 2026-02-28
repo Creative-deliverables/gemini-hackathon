@@ -1,5 +1,4 @@
-import 'dart:typed_data';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -103,6 +102,9 @@ class _NewProjectScreenState extends State<NewProjectScreen>
           platform: platformInfo,
           tone: _selectedTone,
         );
+      }
+      if (kDebugMode) {
+        print(resultHtml);
       }
 
       if (!mounted) {
