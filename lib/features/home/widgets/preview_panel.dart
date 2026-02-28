@@ -37,52 +37,46 @@ class PreviewPanel extends StatelessWidget {
 
           // Content Area
           Expanded(
-            child: htmlContent != null && htmlContent!.isNotEmpty
-                ? SingleChildScrollView(
-                    padding: const EdgeInsets.all(32.0),
-                    child: HtmlWidget(
-                      htmlContent!,
-                      textStyle: theme.textTheme.bodyLarge,
-                      customStylesBuilder: (element) {
-                        // Inherit color from theme for headers instead of forcing dark color
-                        if (element.localName?.startsWith('h') == true) {
-                          return {
-                            'color':
-                                '#${theme.colorScheme.onSurface.value.toRadixString(16).substring(2)}',
-                          };
-                        }
-                        return null;
-                      },
-                    ),
-                  )
-                : Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.description_outlined,
-                          size: 64,
-                          color: theme.colorScheme.onSurface.withAlphaOpacity(
-                            0.2,
-                          ),
+            child: Container(
+              color: Colors.white,
+              child: htmlContent != null && htmlContent!.isNotEmpty
+                  ? SingleChildScrollView(
+                      padding: const EdgeInsets.all(32.0),
+                      child: HtmlWidget(
+                        htmlContent!,
+                        textStyle: theme.textTheme.bodyLarge?.copyWith(
+                          color: Colors.black87,
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No manuscript uploaded yet',
-                          style: theme.textTheme.titleLarge?.copyWith(
+                      ),
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.description_outlined,
+                            size: 64,
                             color: theme.colorScheme.onSurface.withAlphaOpacity(
-                              0.5,
+                              0.2,
                             ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Upload a PDF to view contents and extract information',
-                          style: theme.textTheme.bodyMedium,
-                        ),
-                      ],
+                          const SizedBox(height: 16),
+                          Text(
+                            'No manuscript uploaded yet',
+                            style: theme.textTheme.titleLarge?.copyWith(
+                              color: theme.colorScheme.onSurface
+                                  .withAlphaOpacity(0.5),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Upload a PDF to view contents and extract information',
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+            ),
           ),
         ],
       ),
