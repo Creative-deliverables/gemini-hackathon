@@ -40,7 +40,9 @@ PDF를 별도로 파싱하지 않고 **Gemini에 파일을 그대로 전달**하
 | **배포** | Firebase Hosting (`flutter build web`) |
 
 > **왜 `firebase_ai`인가?**
-> 기존 `google_generative_ai` 패키지는 deprecated 되었습니다. Google의 공식 후속 SDK인 `firebase_ai` (Firebase AI Logic)를 사용합니다. Gemini 2.0+ 모델을 지원하며, API 키 보안도 Firebase App Check로 처리됩니다.
+> 기존 `google_generative_ai` 패키지는 deprecated 되었습니다. Google의 공식 후속 SDK인 `firebase_ai` (Firebase AI Logic)를 사용합니다. Gemini 3.1 모델을 완벽히 지원하며, API 키 보안도 Firebase App Check로 처리됩니다.
+> 
+> **패키지 버전 관리 정책:** 모든 Flutter 패키지는 항상 최신 버전을 유지하는 것을 원칙으로 하되, 호환성 문제가 발생할 경우에만 다운그레이드하여 해결합니다.
 
 ---
 

@@ -27,7 +27,7 @@
                               InlineDataPart('application/pdf', bytes)
                                       ↓
                               [Gemini API 직접 분석]
-                              (gemini-2.5-flash-lite)
+                              (gemini-3.1-pro-preview)
                                       ↓
                               [상세페이지 텍스트 생성]
                                       ↓
@@ -94,8 +94,13 @@ lib/services/gemini_service.dart 파일을 확인하고 수정해줘."
 
 | 모델 | 용도 | 비고 |
 |------|------|------|
-| `gemini-2.5-flash-lite` | **기본 사용** — 빠른 응답, 비용 효율 | 대부분의 경우 이 모델 사용 |
-| `gemini-2.5-flash` | 복잡한 문서 분석, 높은 정확도 필요 시 | 필요 시에만 사용 |
+| `gemini-3.1-pro-preview` | **메인 텍스트 분석/생성 (고성능)** | 복잡한 문서 분석 및 고품질 카피라이팅 |
+| `gemini-3-flash-preview` | **빠른 텍스트 분석/생성** | 빠른 응답이 필요하거나 단순한 작업 시 사용 |
+| `gemini-3.1-flash-image-preview` | **이미지 포함 문서 빠른 분석** | 이미지가 포함된 PDF 등의 빠른 분석용 |
+| `gemini-3-pro-image-preview` | **이미지 포함 문서 정밀 분석** | 이미지가 포함된 PDF 등의 고품질 분석용 |
+
+> **패키지 버전 관리 정책:**
+> 모든 Flutter 패키지는 항상 최신 버전을 유지하는 것을 원칙으로 하되, 호환성 문제가 발생할 경우에만 다운그레이드하여 해결합니다.
 
 ### 프롬프트 작성 원칙
 
@@ -126,7 +131,7 @@ import 'package:firebase_ai/firebase_ai.dart';
 
 class GeminiService {
   final _model = FirebaseAI.googleAI().generativeModel(
-    model: 'gemini-2.5-flash-lite',
+    model: 'gemini-3.1-pro-preview',
   );
 
   Future<String> generateDetailPage(Uint8List pdfBytes, String platform) async {
