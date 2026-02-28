@@ -42,11 +42,16 @@ class PreviewPanel extends StatelessWidget {
                     padding: const EdgeInsets.all(32.0),
                     child: HtmlWidget(
                       htmlContent!,
-                      textStyle: theme.textTheme.bodyLarge?.copyWith(
-                        color: Colors.black87,
-                      ),
+                      textStyle: theme.textTheme.bodyLarge,
                       customStylesBuilder: (element) {
-                        return {'color': '#1E293B'};
+                        // Inherit color from theme for headers instead of forcing dark color
+                        if (element.localName?.startsWith('h') == true) {
+                          return {
+                            'color':
+                                '#${theme.colorScheme.onSurface.value.toRadixString(16).substring(2)}',
+                          };
+                        }
+                        return null;
                       },
                     ),
                   )
