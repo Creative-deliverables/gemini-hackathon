@@ -14,8 +14,8 @@ class PreviewPanel extends StatelessWidget {
           // Header
           Container(
             padding: const EdgeInsets.all(24.0),
-            color: theme.colorScheme.surface,
             decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
               border: Border(bottom: BorderSide(color: theme.dividerColor)),
             ),
             child: Row(
