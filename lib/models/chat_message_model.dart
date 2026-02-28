@@ -8,6 +8,7 @@ class ChatMessage {
     required this.content,
     this.type = MessageType.text,
     this.base64Image,
+    this.imagePrompt,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
 
@@ -15,5 +16,6 @@ class ChatMessage {
   final String content;
   final MessageType type;
   final String? base64Image;
+  final String? imagePrompt;
   final DateTime timestamp;
 }

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -6,7 +7,13 @@ import '../models/chat_message_model.dart';
 import '../services/gemini_service.dart';
 
 class AiChatWidget extends StatefulWidget {
-  const AiChatWidget({super.key});
+  const AiChatWidget({
+    super.key,
+    this.editorContent = '',
+  });
+
+  /// 현재 에디터에 작성 중인 원고 내용 (시스템 프롬프트에 주입)
+  final String editorContent;
 
   @override
   State<AiChatWidget> createState() => _AiChatWidgetState();
@@ -19,7 +26,7 @@ class _AiChatWidgetState extends State<AiChatWidget> {
     ChatMessage(
       role: 'assistant',
       content:
-          'AI 어시스턴트입니다. 작성 중인 글에 대한 조언이 필요하면 편하게 말씀해주세요!',
+          'AI 어시스턴트입니다. 작성 중인 글에 대한 조언이 필요하거나 그림(이미지) 추가 작업이 필요하면 편하게 말씀해주세요!',
     ),
   ];
   bool _isLoading = false;
@@ -43,6 +50,22 @@ class _AiChatWidgetState extends State<AiChatWidget> {
     });
   }
 
+  /// 대화 히스토리를 Gemini Content 형식으로 변환
+  List<Content> _buildHistory() {
+    return _messages
+        .skip(1) // 초기 인사말 제외
+        .map((m) {
+          // 이미지 메시지는 히스토리에 프롬프트 정보로 변환
+          final text = m.type == MessageType.image && m.imagePrompt != null
+              ? '(이전에 성공적으로 이미지를 생성했음. 사용된 프롬프트: "${m.imagePrompt}")'
+              : m.content;
+          return m.role == 'user'
+              ? Content('user', [TextPart(text)])
+              : Content('model', [TextPart(text)]);
+        })
+        .toList();
+  }
+
   Future<void> _handleSend() async {
     final text = _inputController.text.trim();
     if (text.isEmpty || _isLoading) return;
@@ -55,23 +78,28 @@ class _AiChatWidgetState extends State<AiChatWidget> {
     _scrollToBottom();
 
     try {
-      final history = _messages
-          .where((m) => m != _messages.first) // 초기 인사말 제외
-          .map((m) => m.role == 'user'
-              ? Content('user', [TextPart(m.content)])
-              : Content('model', [TextPart(m.content)]))
-          .toList();
-
-      // 마지막 사용자 메시지는 history에서 제거 (chat에서 직접 전송)
+      final history = _buildHistory();
+      // 마지막 사용자 메시지는 history에서 제거 (chatWithContext에서 직접 전송)
       if (history.isNotEmpty) history.removeLast();
 
-      final response = await GeminiService.instance.chat(
+      final response = await GeminiService.instance.chatWithContext(
         history: history,
         userMessage: text,
+        editorContent: widget.editorContent,
       );
 
       setState(() {
-        _messages.add(ChatMessage(role: 'assistant', content: response));
+        if (response.type == 'image') {
+          _messages.add(ChatMessage(
+            role: 'assistant',
+            content: response.text,
+            type: MessageType.image,
+            base64Image: response.base64Image,
+            imagePrompt: response.imagePrompt,
+          ));
+        } else {
+          _messages.add(ChatMessage(role: 'assistant', content: response.text));
+        }
       });
     } catch (e) {
       setState(() {
@@ -143,6 +171,7 @@ class _AiChatWidgetState extends State<AiChatWidget> {
 
   Widget _buildMessageBubble(ChatMessage msg) {
     final isUser = msg.role == 'user';
+    final isInitMessage = msg == _messages.first;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -186,24 +215,64 @@ class _AiChatWidgetState extends State<AiChatWidget> {
                 color: isUser ? Colors.white : AppColors.textPrimary,
               ),
             ),
-            if (!isUser && msg != _messages.first)
+            // 이미지 프롬프트 표시 (접기/펴기)
+            if (msg.type == MessageType.image && msg.imagePrompt != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  dense: true,
+                  title: const Text(
+                    '사용된 프롬프트 보기',
+                    style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  children: [
+                    SelectableText(
+                      msg.imagePrompt!,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            // 생성된 이미지 표시
+            if (msg.type == MessageType.image && msg.base64Image != null)
+              Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.memory(
+                    base64Decode(msg.base64Image!.replaceFirst(
+                        RegExp(r'data:image/[^;]+;base64,'), '')),
+                    width: double.infinity,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            // 텍스트 복사 버튼
+            if (!isUser && !isInitMessage)
               Align(
                 alignment: Alignment.centerRight,
-                child: IconButton(
-                  icon: const Icon(Icons.copy, size: 14),
-                  color: AppColors.textMuted,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  tooltip: '텍스트 복사',
-                  onPressed: () {
-                    Clipboard.setData(ClipboardData(text: msg.content));
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('복사되었습니다.'),
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  },
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 6),
+                  child: IconButton(
+                    icon: const Icon(Icons.copy, size: 14),
+                    color: AppColors.textMuted,
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    tooltip: '텍스트 복사',
+                    onPressed: () {
+                      Clipboard.setData(ClipboardData(text: msg.content));
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('복사되었습니다.'),
+                          duration: Duration(seconds: 1),
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
           ],
