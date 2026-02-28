@@ -1,6 +1,5 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import '../config/theme.dart';
 import '../models/platform_model.dart';
 import '../services/gemini_service.dart';

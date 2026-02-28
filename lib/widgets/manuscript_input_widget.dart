@@ -27,7 +27,7 @@ class ManuscriptInputWidget extends StatelessWidget {
             ),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (_, value, __) {
+              builder: (_, value, _) {
                 return Text(
                   '${value.text.length}자',
                   style: const TextStyle(

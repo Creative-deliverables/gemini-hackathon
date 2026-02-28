@@ -66,7 +66,7 @@ class PlatformSelector extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           DropdownButtonFormField<PlatformFormat>(
-            value: selectedFormat,
+            initialValue: selectedFormat,
             decoration: InputDecoration(
               hintText: '원하시는 출판 규격을 선택하세요',
               border: OutlineInputBorder(
