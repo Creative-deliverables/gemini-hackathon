@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_widget_from_html_core/flutter_widget_from_html_core.dart';
 import 'package:gemini_hackathon/core/extensions/color.dart';
 
 class PreviewPanel extends StatelessWidget {
-  const PreviewPanel({super.key});
+  final String? htmlContent;
+
+  const PreviewPanel({super.key, this.htmlContent});
 
   @override
   Widget build(BuildContext context) {
@@ -34,30 +37,42 @@ class PreviewPanel extends StatelessWidget {
 
           // Content Area
           Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.description_outlined,
-                    size: 64,
-                    color: theme.colorScheme.onSurface.withAlphaOpacity(0.2),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'No manuscript uploaded yet',
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlphaOpacity(0.5),
+            child: htmlContent != null && htmlContent!.isNotEmpty
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.all(32.0),
+                    child: HtmlWidget(
+                      htmlContent!,
+                      textStyle: theme.textTheme.bodyLarge,
+                    ),
+                  )
+                : Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.description_outlined,
+                          size: 64,
+                          color: theme.colorScheme.onSurface.withAlphaOpacity(
+                            0.2,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'No manuscript uploaded yet',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface.withAlphaOpacity(
+                              0.5,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Upload a PDF to view contents and extract information',
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Upload a PDF to view contents and extract information',
-                    style: theme.textTheme.bodyMedium,
-                  ),
-                ],
-              ),
-            ),
           ),
         ],
       ),

@@ -1,8 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:gemini_hackathon/core/extensions/color.dart';
 
-class ChatPanel extends StatelessWidget {
-  const ChatPanel({super.key});
+class ChatPanel extends StatefulWidget {
+  final ValueChanged<String>? onHtmlGenerated;
+
+  const ChatPanel({super.key, this.onHtmlGenerated});
+
+  @override
+  State<ChatPanel> createState() => _ChatPanelState();
+}
+
+class _ChatPanelState extends State<ChatPanel> {
+  final TextEditingController _controller = TextEditingController();
+  bool _isLoading = false;
+
+  void _handleSend() {
+    // For now, this just simulates receiving an HTML string from Gemini
+    // and passing it up to the HomePage.
+    // TODO: Connect to actual GeminiService here
+    if (_controller.text.isEmpty) return;
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulate network delay
+    Future.delayed(const Duration(seconds: 2), () {
+      if (!mounted) return;
+
+      final mockHtml =
+          '''
+      <h2>Generated Detail Page</h2>
+      <p>This is a <strong>mock</strong> HTML response.</p>
+      <ul>
+        <li>Point 1 based on: ${_controller.text}</li>
+        <li>Point 2</li>
+      </ul>
+      <figure class="my-8 text-center"><img src="https://placehold.co/800x500/f3f4f6/a8a29e?text=Book+Mockup" alt="책 샘플 이미지" class="w-full rounded-lg shadow-md mx-auto" /><figcaption class="text-sm text-gray-500 mt-2">※ 편집된 책의 본문 샘플 이미지</figcaption></figure>
+      ''';
+
+      widget.onHtmlGenerated?.call(mockHtml);
+
+      setState(() {
+        _isLoading = false;
+        _controller.clear();
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,6 +99,7 @@ class ChatPanel extends StatelessWidget {
               children: [
                 Expanded(
                   child: TextField(
+                    controller: _controller,
                     decoration: InputDecoration(
                       hintText: 'Type your message...',
                       contentPadding: const EdgeInsets.symmetric(
@@ -70,16 +115,19 @@ class ChatPanel extends StatelessWidget {
                         borderSide: BorderSide(color: theme.dividerColor),
                       ),
                     ),
+                    onSubmitted: (_) => _handleSend(),
                   ),
                 ),
                 const SizedBox(width: 12),
                 CircleAvatar(
                   backgroundColor: theme.colorScheme.primary,
                   radius: 24,
-                  child: IconButton(
-                    icon: const Icon(Icons.send, color: Colors.white),
-                    onPressed: () {},
-                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : IconButton(
+                          icon: const Icon(Icons.send, color: Colors.white),
+                          onPressed: _handleSend,
+                        ),
                 ),
               ],
             ),
