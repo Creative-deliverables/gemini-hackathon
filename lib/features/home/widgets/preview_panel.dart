@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gemini_hackathon/core/extensions/color.dart';
 
 class PreviewPanel extends StatelessWidget {
   const PreviewPanel({super.key});
@@ -40,13 +41,13 @@ class PreviewPanel extends StatelessWidget {
                   Icon(
                     Icons.description_outlined,
                     size: 64,
-                    color: theme.colorScheme.onSurface.withOpacity(0.2),
+                    color: theme.colorScheme.onSurface.withAlphaOpacity(0.2),
                   ),
                   const SizedBox(height: 16),
                   Text(
                     'No manuscript uploaded yet',
                     style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.onSurface.withOpacity(0.5),
+                      color: theme.colorScheme.onSurface.withAlphaOpacity(0.5),
                     ),
                   ),
                   const SizedBox(height: 8),

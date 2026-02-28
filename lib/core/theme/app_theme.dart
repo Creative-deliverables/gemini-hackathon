@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'app_colors.dart';
 
 class AppTheme {
@@ -13,8 +14,6 @@ class AppTheme {
         onSecondary: AppColors.lightTextPrimary,
         surface: AppColors.lightSurface,
         onSurface: AppColors.lightTextPrimary,
-        background: AppColors.lightBg,
-        onBackground: AppColors.lightTextPrimary,
         error: Colors.redAccent,
         onError: Colors.white,
       ),

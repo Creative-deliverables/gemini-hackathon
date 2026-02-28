@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../config/theme.dart';
 import '../models/platform_model.dart';
 
@@ -25,10 +26,7 @@ class PlatformSelector extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '출판사 플랫폼',
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
+        Text('출판사 플랫폼', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: 12),
         Wrap(
           spacing: 8,
@@ -55,10 +53,7 @@ class PlatformSelector extends StatelessWidget {
         ),
         if (selectedPlatform != null) ...[
           const SizedBox(height: 20),
-          Text(
-            '출판 규격',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+          Text('출판 규격', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           Text(
             '나중에 에디터 화면에서도 언제든 다른 판형으로 변경할 수 있습니다.',
@@ -72,8 +67,10 @@ class PlatformSelector extends StatelessWidget {
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 14,
+              ),
             ),
             dropdownColor: AppColors.surface,
             items: formats.map((f) {

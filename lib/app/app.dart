@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
-import '../core/theme/app_theme.dart';
-import '../features/home/pages/home_page.dart';
+import 'package:gemini_hackathon/config/router.dart';
+import 'package:gemini_hackathon/config/theme.dart';
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class PageCraftApp extends StatelessWidget {
+  const PageCraftApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AI Detail Page Generator',
+    return MaterialApp.router(
+      title: 'AI PageGen',
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      home: const HomePage(),
+      theme: buildDarkTheme(),
+      routerConfig: router,
     );
   }
 }

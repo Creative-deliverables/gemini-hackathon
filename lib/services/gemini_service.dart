@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
@@ -26,14 +25,12 @@ class GeminiService {
   static final instance = GeminiService._();
 
   /// 메인 생성 모델 (고성능)
-  GenerativeModel get _proModel => FirebaseAI.googleAI().generativeModel(
-        model: 'gemini-3.1-pro-preview',
-      );
+  GenerativeModel get _proModel =>
+      FirebaseAI.googleAI().generativeModel(model: 'gemini-3.1-pro-preview');
 
   /// 빠른 응답 모델 (채팅용)
-  GenerativeModel get _flashModel => FirebaseAI.googleAI().generativeModel(
-        model: 'gemini-3-flash-preview',
-      );
+  GenerativeModel get _flashModel =>
+      FirebaseAI.googleAI().generativeModel(model: 'gemini-3-flash-preview');
 
   /// 이미지 생성 모델 (Imagen)
   ImagenModel get _imagenModel => FirebaseAI.googleAI().imagenModel(
@@ -114,10 +111,7 @@ $platformInfo
       );
 
       final response = await _proModel.generateContent([
-        Content.multi([
-          TextPart(prompt),
-          TextPart('\n\n[입력 원고]\n$text'),
-        ]),
+        Content.multi([TextPart(prompt), TextPart('\n\n[입력 원고]\n$text')]),
       ]);
 
       return response.text ?? '';

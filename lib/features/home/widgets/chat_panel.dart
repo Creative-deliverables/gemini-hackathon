@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gemini_hackathon/core/extensions/color.dart';
 
 class ChatPanel extends StatelessWidget {
   const ChatPanel({super.key});
@@ -96,7 +97,7 @@ class ChatPanel extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CircleAvatar(
-            backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+            backgroundColor: theme.colorScheme.primary.withAlphaOpacity(0.1),
             child: Icon(Icons.auto_awesome, color: theme.colorScheme.primary),
           ),
           const SizedBox(width: 16),
