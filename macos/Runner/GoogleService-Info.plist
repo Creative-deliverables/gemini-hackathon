@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyAKKiCupV_0DM_YN-AXpmNgcGQFz_BIFfM</string>
+	<key>GCM_SENDER_ID</key>
+	<string>493360948592</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.creativedeliverables.geminiHackathon</string>
+	<key>PROJECT_ID</key>
+	<string>gemini-3-hackathon-seoul</string>
+	<key>STORAGE_BUCKET</key>
+	<string>gemini-3-hackathon-seoul.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:493360948592:ios:7f85feaebeb8b27a9edbb5</string>
+</dict>
+</plist>
