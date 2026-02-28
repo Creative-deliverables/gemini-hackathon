@@ -1,12 +1,14 @@
+import 'dart:convert';
+
 import 'package:firebase_ai/firebase_ai.dart';
 import 'package:flutter/foundation.dart';
 
 /// AI 응답 결과 (텍스트 또는 이미지)
 class ChatResponse {
   ChatResponse.text(this.text)
-      : type = 'text',
-        base64Image = null,
-        imagePrompt = null;
+    : type = 'text',
+      base64Image = null,
+      imagePrompt = null;
 
   ChatResponse.image({
     required this.text,
@@ -33,13 +35,14 @@ class GeminiService {
       FirebaseAI.googleAI().generativeModel(model: 'gemini-3-flash-preview');
 
   /// 이미지 생성 모델 (Imagen)
-  ImagenModel get _imagenModel => FirebaseAI.googleAI().imagenModel(
-        model: 'imagen-3.0-generate-002',
-      );
+  ImagenModel get _imagenModel =>
+      FirebaseAI.googleAI().imagenModel(model: 'imagen-3.0-generate-002');
 
   /// [IMAGE_PROMPT: ...] 태그 감지 정규식
-  static final _imageTagRegex =
-      RegExp(r'\[(?:IMAGE_PROMPT|Generated Image Prompt):\s*([\s\S]*?)\]', caseSensitive: false);
+  static final _imageTagRegex = RegExp(
+    r'\[(?:IMAGE_PROMPT|Generated Image Prompt):\s*([\s\S]*?)\]',
+    caseSensitive: false,
+  );
 
   /// AI 채팅 시스템 프롬프트 (Next.js /api/ai-chat에서 포팅)
   String _buildChatSystemPrompt(String editorContent) {
@@ -159,7 +162,7 @@ $platformInfo
       final systemHistory = <Content>[
         Content('user', [TextPart(_buildChatSystemPrompt(editorContent))]),
         Content('model', [
-          TextPart('시스템 지침을 확인했으며, 사용자의 글쓰기를 돕고 필요한 경우 이미지 생성 태그를 반환하겠습니다.')
+          TextPart('시스템 지침을 확인했으며, 사용자의 글쓰기를 돕고 필요한 경우 이미지 생성 태그를 반환하겠습니다.'),
         ]),
         ...history,
       ];
@@ -175,7 +178,8 @@ $platformInfo
         try {
           final base64 = await generateImage(imagePrompt);
           return ChatResponse.image(
-            text: '이미지를 성공적으로 생성했어요!\n\n마음에 들지 않거나 추가하고 싶은 부분이 있다면, "더 ㅇㅇ하게 해줘"처럼 계속 말씀해주세요.',
+            text:
+                '이미지를 성공적으로 생성했어요!\n\n마음에 들지 않거나 추가하고 싶은 부분이 있다면, "더 ㅇㅇ하게 해줘"처럼 계속 말씀해주세요.',
             base64Image: base64,
             imagePrompt: imagePrompt,
           );
