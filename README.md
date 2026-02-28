@@ -9,7 +9,7 @@
 
 ---
 
-![Hero Image](./docs/screenshots/hero.png)
+![Hero Image](https://github.com/user-attachments/assets/453a5b04-dea2-46f0-b09e-5432a04ca112)
 
 ---
 
@@ -33,15 +33,15 @@
 
 ### 1. 원고 직접 작성 및 PDF 업로드
 복잡한 텍스트 추출 과정 없이, 작성 중인 원고나 완성된 PDF 파일을 그대로 업로드하세요. Gemini가 파일의 내용을 즉시 이해합니다.
-![Upload](./docs/screenshots/1_upload.png)
+![Upload](https://github.com/user-attachments/assets/fc47d623-3d35-440b-bdd1-29d3a0317bdf)
 
 ### 2. 맞춤형 템플릿 및 문체 설정
 게시할 플랫폼(교보문고, 예스24, 부크크 등)을 선택하고, 독자에게 다가갈 문체(친근한, 전문적인, 감성적인 등)를 설정할 수 있습니다.
-![Template](./docs/screenshots/2_template.png)
+![Template](https://github.com/user-attachments/assets/38bcc2a4-7775-4654-902d-d68c05fb0d98)
 
 ### 3. AI 기반 상세페이지 자동 생성 & 대화형 수정
 생성된 결과물을 확인하고, 마음에 들지 않는 부분은 AI와 대화하며 실시간으로 수정할 수 있습니다. 완성된 카피는 원클릭으로 복사하여 바로 사용하세요.
-![Result](./docs/screenshots/3_result.png)
+![Result](https://github.com/user-attachments/assets/1d776e3b-fb01-4d8e-91cb-292c0dda6ee8)
 
 ---
 
@@ -81,6 +81,6 @@ flutter run -d chrome
 ---
 
 <p align="center">
-  Made with ❤️ at Google Gemini API Hackathon 2026
+  Made with ❤️ at Google Gemini 3 Hackathon 2026
 </p>
 
