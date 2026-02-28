@@ -18,8 +18,8 @@ class PreviewPanel extends StatelessWidget {
           // Header
           Container(
             padding: const EdgeInsets.all(24.0),
-            color: theme.colorScheme.surface,
             decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
               border: Border(bottom: BorderSide(color: theme.dividerColor)),
             ),
             child: Row(
@@ -42,7 +42,12 @@ class PreviewPanel extends StatelessWidget {
                     padding: const EdgeInsets.all(32.0),
                     child: HtmlWidget(
                       htmlContent!,
-                      textStyle: theme.textTheme.bodyLarge,
+                      textStyle: theme.textTheme.bodyLarge?.copyWith(
+                        color: Colors.black87,
+                      ),
+                      customStylesBuilder: (element) {
+                        return {'color': '#1E293B'};
+                      },
                     ),
                   )
                 : Center(

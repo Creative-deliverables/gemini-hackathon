@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
+import '../../../core/widgets/resize_divider.dart';
 import '../widgets/chat_panel.dart';
 import '../widgets/preview_panel.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final String? initialHtml;
+
+  const HomePage({super.key, this.initialHtml});
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  String? _generatedHtml;
+  late String? _generatedHtml = widget.initialHtml;
+  double _leftRatio = 0.6; // Default to 60% for Preview Panel
+  bool _isDividerHovering = false;
 
   void _handleHtmlGenerated(String html) {
     setState(() {
@@ -21,20 +26,37 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Row(
-        children: [
-          // Left Panel: AI Chat Interface (approx 40% width)
-          Expanded(
-            flex: 4,
-            child: ChatPanel(onHtmlGenerated: _handleHtmlGenerated),
-          ),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          final totalWidth = constraints.maxWidth;
 
-          // Divider
-          const VerticalDivider(width: 1),
+          return Row(
+            children: [
+              // Left Panel: Manuscript Preview & Output
+              SizedBox(
+                width: totalWidth * _leftRatio,
+                child: PreviewPanel(htmlContent: _generatedHtml),
+              ),
 
-          // Right Panel: Manuscript Preview & Output (approx 60% width)
-          Expanded(flex: 6, child: PreviewPanel(htmlContent: _generatedHtml)),
-        ],
+              // Adjustable Divider
+              ResizeDivider(
+                isHovering: _isDividerHovering,
+                onHoverChanged: (hover) =>
+                    setState(() => _isDividerHovering = hover),
+                onDragUpdate: (delta) {
+                  setState(() {
+                    _leftRatio += delta / totalWidth;
+                    // Clamp ratio between 50% (5:5) and 70% (7:3)
+                    _leftRatio = _leftRatio.clamp(0.5, 0.7);
+                  });
+                },
+              ),
+
+              // Right Panel: AI Chat Interface
+              Expanded(child: ChatPanel(onHtmlGenerated: _handleHtmlGenerated)),
+            ],
+          );
+        },
       ),
     );
   }

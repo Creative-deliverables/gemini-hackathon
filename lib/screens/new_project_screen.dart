@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../config/theme.dart';
 import '../models/platform_model.dart';
@@ -104,10 +105,11 @@ class _NewProjectScreenState extends State<NewProjectScreen>
         );
       }
 
-      if (!mounted) return;
+      if (!mounted) {
+        return;
+      }
+      context.go('/project/result', extra: resultHtml);
 
-      // TODO: 팀원 담당 결과 화면으로 데이터 전달
-      // context.go('/project/result', extra: resultHtml);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('생성 완료! (${resultHtml.length}자)'),
