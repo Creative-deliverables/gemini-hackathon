@@ -1,6 +1,7 @@
 import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+
 import '../config/theme.dart';
 import '../models/platform_model.dart';
 import '../services/gemini_service.dart';
@@ -60,8 +61,7 @@ class _NewProjectScreenState extends State<NewProjectScreen>
 
     if (_isTextMode) {
       if (_manuscriptController.text.trim().length < 10) {
-        setState(
-            () => _errorMsg = '원고 내용이 너무 짧습니다. 충분한 내용을 작성해주세요.');
+        setState(() => _errorMsg = '원고 내용이 너무 짧습니다. 충분한 내용을 작성해주세요.');
         return;
       }
     } else {
@@ -157,9 +157,9 @@ class _NewProjectScreenState extends State<NewProjectScreen>
       children: [
         Text(
           '새 프로젝트 만들기',
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 8),
         Text(
@@ -182,7 +182,10 @@ class _NewProjectScreenState extends State<NewProjectScreen>
             text: '프로젝트 이름 ',
             style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
             children: [
-              TextSpan(text: '*', style: TextStyle(color: AppColors.error)),
+              TextSpan(
+                text: '*',
+                style: TextStyle(color: AppColors.error),
+              ),
             ],
           ),
         ),
@@ -192,9 +195,7 @@ class _NewProjectScreenState extends State<NewProjectScreen>
           child: TextField(
             controller: _nameController,
             enabled: _step == 1,
-            decoration: const InputDecoration(
-              hintText: '예: 신규 건강기능식품 런칭 페이지',
-            ),
+            decoration: const InputDecoration(hintText: '예: 신규 건강기능식품 런칭 페이지'),
           ),
         ),
       ],
@@ -211,7 +212,10 @@ class _NewProjectScreenState extends State<NewProjectScreen>
       ),
       child: Text(
         _errorMsg,
-        style: const TextStyle(color: AppColors.error, fontWeight: FontWeight.w500),
+        style: const TextStyle(
+          color: AppColors.error,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
@@ -243,9 +247,7 @@ class _NewProjectScreenState extends State<NewProjectScreen>
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: _isTextMode
-                      ? ManuscriptInputWidget(
-                          controller: _manuscriptController,
-                        )
+                      ? ManuscriptInputWidget(controller: _manuscriptController)
                       : FileUploadWidget(
                           selectedFileName: _pdfFileName,
                           selectedFileSize: _pdfFileSize,
@@ -276,8 +278,7 @@ class _NewProjectScreenState extends State<NewProjectScreen>
           child: ElevatedButton(
             onPressed: _goToStep2,
             style: ElevatedButton.styleFrom(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
             ),
             child: const Text('다음: 서식 및 템플릿 설정하기'),
           ),
@@ -305,8 +306,11 @@ class _NewProjectScreenState extends State<NewProjectScreen>
                   color: AppColors.primary.withAlpha(26),
                   shape: BoxShape.circle,
                 ),
-                child:
-                    const Icon(Icons.dashboard, size: 24, color: AppColors.primary),
+                child: const Icon(
+                  Icons.dashboard,
+                  size: 24,
+                  color: AppColors.primary,
+                ),
               ),
               const SizedBox(width: 12),
               Column(
@@ -320,7 +324,9 @@ class _NewProjectScreenState extends State<NewProjectScreen>
                   Text(
                     '이 설정을 바탕으로 AI가 최적화된 서식을 구성합니다.',
                     style: TextStyle(
-                        fontSize: 13, color: AppColors.textSecondary),
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
                   ),
                 ],
               ),
@@ -360,8 +366,7 @@ class _NewProjectScreenState extends State<NewProjectScreen>
                     selectedFormat: _selectedFormat,
                     onPlatformChanged: (p) =>
                         setState(() => _selectedPlatform = p),
-                    onFormatChanged: (f) =>
-                        setState(() => _selectedFormat = f),
+                    onFormatChanged: (f) => setState(() => _selectedFormat = f),
                   ),
                   const SizedBox(height: 24),
                   ToneSelector(
@@ -379,16 +384,21 @@ class _NewProjectScreenState extends State<NewProjectScreen>
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               TextButton.icon(
-                onPressed: _isGenerating ? null : () => setState(() => _step = 1),
+                onPressed: _isGenerating
+                    ? null
+                    : () => setState(() => _step = 1),
                 icon: const Icon(Icons.arrow_back, size: 16),
                 label: const Text('이전 (원고 편집)'),
               ),
               ElevatedButton(
-                onPressed:
-                    _isGenerating || _selectedFormat == null ? null : _handleGenerate,
+                onPressed: _isGenerating || _selectedFormat == null
+                    ? null
+                    : _handleGenerate,
                 style: ElevatedButton.styleFrom(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16,
+                  ),
                   disabledBackgroundColor: AppColors.primary.withAlpha(77),
                 ),
                 child: _isGenerating

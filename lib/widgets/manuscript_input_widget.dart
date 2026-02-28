@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import '../config/theme.dart';
 
 class ManuscriptInputWidget extends StatelessWidget {
@@ -21,13 +22,13 @@ class ManuscriptInputWidget extends StatelessWidget {
           children: [
             Text(
               '원고 입력',
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(color: AppColors.textSecondary),
             ),
             ValueListenableBuilder<TextEditingValue>(
               valueListenable: controller,
-              builder: (_, value, __) {
+              builder: (_, value, _) {
                 return Text(
                   '${value.text.length}자',
                   style: const TextStyle(
@@ -48,7 +49,8 @@ class ManuscriptInputWidget extends StatelessWidget {
             expands: true,
             textAlignVertical: TextAlignVertical.top,
             decoration: InputDecoration(
-              hintText: '원고 내용을 입력해주세요...\n\n책의 핵심 내용, 목차, 주요 메시지 등을 자유롭게 작성하세요.',
+              hintText:
+                  '원고 내용을 입력해주세요...\n\n책의 핵심 내용, 목차, 주요 메시지 등을 자유롭게 작성하세요.',
               hintMaxLines: 5,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
